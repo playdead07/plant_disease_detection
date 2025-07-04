@@ -1,7 +1,9 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, File, UploadFile
 from pydantic import BaseModel
 import numpy as np
 import tflite_runtime.interpreter as tflite
+from PIL import Image
+import io
 
 app = FastAPI()
 
@@ -20,21 +22,24 @@ def read_root():
     return {"message": "TFLite Model Server is Running"}
 
 @app.post("/predict")
-def predict(data: InputData):
+async def predict(file: UploadFile = File(...)):
     try:
-        # Convert input list to numpy array
-        input_array = np.array([data.input], dtype=np.float32)
-        
+        # Read and preprocess image
+        contents = await file.read()
+        image = Image.open(io.BytesIO(contents)).convert("RGB")
+        image = image.resize((224, 224))
+        input_array = np.array(image, dtype=np.uint8)
+        input_array = np.expand_dims(input_array, axis=0)  # shape: (1, 224, 224, 3)
+
+        # Apply quantization if needed
+        scale, zero_point = input_details[0]['quantization']
+        if scale > 0:
+            input_array = (input_array / scale + zero_point).astype(np.uint8)
+
         # Set input tensor
         interpreter.set_tensor(input_details[0]['index'], input_array)
-        
-        # Run inference
         interpreter.invoke()
-        
-        # Get output tensor
         output_data = interpreter.get_tensor(output_details[0]['index'])
-        
         return {"prediction": output_data.tolist()}
-
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
