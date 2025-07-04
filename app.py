@@ -4,6 +4,7 @@ import numpy as np
 import tflite_runtime.interpreter as tflite
 from PIL import Image
 import io
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
@@ -25,6 +26,14 @@ labels = [
     "Potato Early Blight",
     "Corn Gray Leaf Spot"
 ]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 def read_root():
