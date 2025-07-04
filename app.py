@@ -17,6 +17,15 @@ output_details = interpreter.get_output_details()
 class InputData(BaseModel):
     input: list  # assuming your model expects flat list of floats
 
+labels = [
+    "Strawberry Leaf Scorch",
+    "Tomato Leaf Mold",
+    "Tomato Mosaic Virus",
+    "Corn Common Rust",
+    "Potato Early Blight",
+    "Corn Gray Leaf Spot"
+]
+
 @app.get("/")
 def read_root():
     return {"message": "TFLite Model Server is Running"}
@@ -40,6 +49,10 @@ async def predict(file: UploadFile = File(...)):
         interpreter.set_tensor(input_details[0]['index'], input_array)
         interpreter.invoke()
         output_data = interpreter.get_tensor(output_details[0]['index'])
-        return {"prediction": output_data.tolist()}
+
+        # Get predicted label
+        pred_idx = int(np.argmax(output_data))
+        pred_label = labels[pred_idx]
+        return {"label": pred_label}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
