@@ -2,4 +2,4 @@ fastapi
 tensorflow
 uvicorn
 tflite-runtime
-numpy
+numpy<2
