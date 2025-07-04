@@ -1,12 +1,12 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import numpy as np
-import tensorflow as tf
+import tflite_runtime.interpreter as tflite
 
 app = FastAPI()
 
 # Load TFLite model
-interpreter = tf.lite.Interpreter(model_path="model.tflite")
+interpreter = tflite.Interpreter(model_path="model.tflite")
 interpreter.allocate_tensors()
 
 input_details = interpreter.get_input_details()
