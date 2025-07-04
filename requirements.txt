@@ -1,4 +1,5 @@
 fastapi
+tensorflow
 uvicorn
 tflite-runtime
 numpy
