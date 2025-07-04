@@ -4,3 +4,4 @@ uvicorn
 tflite-runtime
 numpy<2
 pillow
+python-multipart
